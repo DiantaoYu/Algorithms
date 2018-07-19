@@ -1,0 +1,104 @@
+public class Solution {
+    /**
+     * @param board: A list of lists of character
+     * @param words: A list of string
+     * @return: A list of string
+     */
+     
+    public int[] x_axis = {0,-1,0,1};
+    public int[] y_axis = {-1,0,1,0};
+    public List<String> results = new ArrayList<String>();
+
+    public List<String> wordSearchII(char[][] board, List<String> words) {
+        TrieTree t = new TrieTree();
+        for(int i = 0; i < words.size(); i++) {
+            t.insert(words.get(i));
+        }
+        for(int i = 0; i < board.length; i++){
+            for(int j = 0; j < board[i].length; j++){
+                search(i,j,"",board,t);
+            }
+        }
+        return results;
+    }
+    
+    public void search(int r, int c, String word, char[][] board, TrieTree t) {
+        if(r < 0 || r >= board.length || c < 0 || c >= board[r].length) {
+            return;
+        }
+        char cur = board[r][c];
+        if(cur == 0){
+            return;
+        }
+        word += cur;
+        int cur_check = t.check(word);
+        if(cur_check == -1) {
+            return;
+        }
+        board[r][c] = 0;
+        if(cur_check == 2) {
+            if(!results.contains(word)){
+                results.add(word);
+            }
+        }
+        for(int i = 0; i < 4; i++) {
+            search(r+y_axis[i],c+x_axis[i],word,board,t);
+        }
+        board[r][c] = cur;
+    }
+    
+}
+
+class TrieNode {
+    public char c;
+    public TrieNode[] children = new TrieNode[26];
+    public boolean isWord = false;
+    
+    public TrieNode() {
+    }
+    
+    public TrieNode(char c) {
+        this.c = c;
+    }
+}
+
+class TrieTree {
+    public TrieNode root;
+    
+    public TrieTree() {
+        root = new TrieNode();
+    }
+    
+    public void insert(String word) {
+        TrieNode cur = root;
+        char[] wordArray = word.toCharArray();
+        for (int i = 0; i < wordArray.length; i++) {
+            char wc = wordArray[i];
+            if(cur.children[wc - 'a'] == null) {
+                TrieNode newNode = new TrieNode(wc);
+                cur.children[wc - 'a'] = newNode;
+                cur = newNode;
+            } else {
+                cur = cur.children[wc - 'a'];
+            }
+            
+            if(i + 1 >= wordArray.length) {
+                cur.isWord = true;
+            }
+        } 
+    }
+    
+    public int check(String word) {
+        TrieNode cur = root;
+        char[] wordArray = word.toCharArray();
+        for (int i = 0; i < wordArray.length; i++) {
+            char wc = wordArray[i];
+            if(cur.children[wc - 'a'] == null) {
+                return -1;
+            } else {
+                cur = cur.children[wc - 'a'];
+            }
+        } 
+        return cur.isWord == true ? 2:1;
+    }
+}
